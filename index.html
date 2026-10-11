@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UASA Year 6 Chinese Interactive Revision 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Fredoka', 'Noto Sans SC', sans-serif;
+            background-color: #f0f9ff;
+        }
+
+        .zh-char {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid #e0f2fe;
+        }
+
+        .bounce-hover:hover {
+            transform: translateY(-3px);
+            transition: all 0.2s ease;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+    <!-- TOP NAVBAR -->
+    <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                    <i data-lucide="book-open-check" class="w-7 h-7 text-yellow-300"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg md:text-xl tracking-wide flex items-center gap-2">
+                        UASA Year 6 Chinese 2026
+                        <span class="bg-yellow-400 text-blue-900 text-xs px-2 py-0.5 rounded-full font-extrabold">华文复习</span>
+                    </h1>
+                    <p class="text-xs text-blue-100">Interactive Learning & Exam Revision App</p>
+                </div>
+            </div>
+
+            <!-- CONTROLS & MODES -->
+            <div class="flex items-center gap-2 sm:gap-4 ml-auto">
+                <!-- Music Toggle -->
+                <button id="bgmToggleBtn" onclick="toggleBGM()" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-xs font-semibold transition border border-white/20">
+                    <i id="bgmIcon" data-lucide="music-4" class="w-4 h-4 text-pink-300"></i>
+                    <span id="bgmText" class="hidden sm:inline">BGM: OFF</span>
+                </button>
+
+                <!-- Mode Switcher -->
+                <div class="bg-blue-800/60 p-1 rounded-xl flex text-xs font-semibold border border-white/10">
+                    <button id="btnStudyMode" onclick="switchMode('study')" class="px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition">
+                        📖 Study Hub
+                    </button>
+                    <button id="btnQuizMode" onclick="switchMode('quiz')" class="px-3 py-1 rounded-lg text-white hover:text-yellow-200 transition flex items-center gap-1">
+                        ⚡ Quiz Practice
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- SCORE & PROGRESS HEADER (Quiz Mode Only) -->
+        <div id="quizHeader" class="hidden mb-6 bg-white rounded-2xl p-4 shadow-sm border border-blue-100 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-100 p-2.5 rounded-xl text-amber-600">
+                    <i data-lucide="trophy" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Score</div>
+                    <div class="text-2xl font-bold text-slate-800"><span id="totalScore">0</span> / 30 PTS</div>
+                </div>
+            </div>
+
+            <!-- Question Navigation Pills -->
+            <div class="flex flex-wrap gap-1.5" id="questionPills">
+                <!-- Pills generated dynamically -->
+            </div>
+        </div>
+
+        <!-- SECTION SELECTOR TABS -->
+        <div class="flex overflow-x-auto gap-2 pb-3 mb-6 no-scrollbar" id="sectionTabs">
+            <!-- Tabs generated by JS -->
+        </div>
+
+        <!-- CONTENT AREA CONTAINER -->
+        <div id="appContent" class="transition-all duration-300">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+        <p>UASA Bahasa Cina Tahun 6 (2026) • Designed for Interactive Learning with Pinyin & Pronunciation</p>
+    </footer>
+
+    <!-- APP SCRIPT -->
+    <script>
+        // ==========================================
+        // DATA STRUCTURE FOR QUESTIONS 1 - 8
+        // ==========================================
+        const examData = [
+            {
+                id: 1,
+                title: "Soalan 1: Write correct answer based on image",
+                instruction: "Hafal perkataan ini / Memorize these actions:",
+                type: "image_choice",
+                items: [
+                    { char: "看电影", pinyin: "kàn diàn yǐng", translation: "Watch a movie", icon: "clapperboard", hints: ["cinema", "screen"] },
+                    { char: "弹钢琴", pinyin: "tán gāng qín", translation: "Play the piano", icon: "piano", hints: ["keys", "music"] },
+                    { char: "骑自行车", pinyin: "qí zì xíng chē", translation: "Ride a bicycle", icon: "bike", hints: ["wheels", "cycling"] },
+                    { char: "阅读", pinyin: "yuè dú", translation: "Read a book", icon: "book-open", hints: ["literature", "reading"] }
+                ]
+            },
+            {
+                id: 2,
+                title: "Soalan 2: Circle/Select the correct pastry",
+                instruction: "Hafal perkataan ini / Memorize these food items:",
+                type: "pastry_select",
+                items: [
+                    { char: "面包", pinyin: "miàn bāo", translation: "Bread", emoji: "🍞" },
+                    { char: "蛋挞", pinyin: "dàn tà", translation: "Egg Tart", emoji: "🥧" },
+                    { char: "鸡蛋饼", pinyin: "jī dàn bǐng", translation: "Egg Pancake / Crepe", emoji: "🥞" },
+                    { char: "威化饼", pinyin: "wēi huà bǐng", translation: "Wafer Biscuit", emoji: "🧇" },
+                    { char: "蛋糕", pinyin: "dàn gāo", translation: "Cake", emoji: "🎂" }
+                ]
+            },
+            {
+                id: 3,
+                title: "Soalan 3: Match Pinyin with Character",
+                instruction: "Hafal perkataan ini / Memorize terms and matching pinyin:",
+                type: "matching",
+                items: [
+                    { char: "下棋", pinyin: "xià qí", translation: "Play Chess", emoji: "♟️" },
+                    { char: "农夫", pinyin: "nóng fū", translation: "Farmer", emoji: "👨‍🌾" },
+                    { char: "保安", pinyin: "bǎo ān", translation: "Security Guard", emoji: "👮" },
+                    { char: "跑步", pinyin: "pǎo bù", translation: "Running", emoji: "🏃" },
+                    { char: "小贩", pinyin: "xiǎo fàn", translation: "Hawker / Vendor", emoji: "🛒" }
+                ]
+            },
+            {
+                id: 4,
+                title: "Soalan 4: Sentence Word Order (True ✅ / False ❌)",
+                instruction: "Baca ayat dan pastikan sama ada susunan ayat itu betul atau salah:",
+                type: "true_false",
+                items: [
+                    { sentence: "农夫我爸爸是职业", pinyin: "nóng fū wǒ bà ba shì zhí yè", isCorrect: false, correctForm: "我爸爸的职业是农夫。", note: "Incorrect structure. Subject and profession are misplaced." },
+                    { sentence: "我去图书馆借书", pinyin: "wǒ qù tú shū guǎn jiè shū", isCorrect: true, note: "Correct word order (Subject + Go + Place + Action)." },
+                    { sentence: "我要去礼堂看讲故事比赛", pinyin: "wǒ yào qù lǐ táng kàn jiǎng gù shì bǐ sài", isCorrect: true, note: "Correct word order (Subject + Want to go + Location + Action)." }
+                ]
+            },
+            {
+                id: 5,
+                title: "Soalan 5: Complete the Characters",
+                instruction: "Hafal karakter ini / Memorize and practice character building:",
+                type: "character_complete",
+                items: [
+                    { char: "弟", pinyin: "dì", translation: "Younger Brother", components: ["丷", "弓", "丿", "丨"], strokeCount: 7 },
+                    { char: "鸡", pinyin: "jī", translation: "Chicken", components: ["又", "鸟"], strokeCount: 7 },
+                    { char: "安", pinyin: "ān", translation: "Safe / Peace", components: ["宀", "女"], strokeCount: 6 },
+                    { char: "夫", pinyin: "fū", translation: "Man / Husband", components: ["二", "人"], strokeCount: 4 }
+                ]
+            },
+            {
+                id: 6,
+                title: "Soalan 6: Rewrite Sentences Accurately",
+                instruction: "Pastikan tulis semula dengan betul. Jangan tinggal soalan ini:",
+                type: "rewrite_sentences",
+                items: [
+                    { id: 1, text: "我的哥哥是快递员。", pinyin: "wǒ de gē ge shì kuài dì yuán.", translation: "My elder brother is a courier." },
+                    { id: 2, text: "我要到图书馆借书。", pinyin: "wǒ yào dào tú shū guǎn jiè shū.", translation: "I want to go to the library to borrow books." },
+                    { id: 3, text: "我喜欢听小猫的声音。", pinyin: "wǒ xǐ huan tīng xiǎo māo de shēng yīn.", translation: "I like listening to the sound of kittens." },
+                    { id: 4, text: "做蛋糕需要面粉和牛奶。", pinyin: "zuò dàn gāo xū yào miàn fěn hé niú nǎi.", translation: "Making a cake requires flour and milk." },
+                    { id: 5, text: "我喜欢阅读。", pinyin: "wǒ xǐ huan yuè dú.", translation: "I like reading." }
+                ]
+            },
+            {
+                id: 7,
+                title: "Soalan 7: Group Characters by Radical",
+                instruction: "Tuliskan karakter mengikut kumpulan yang betul:",
+                type: "radical_grouping",
+                radicals: [
+                    { radical: "冫", meaning: "Ice (Ais)", description: "Selalunya mempunyai kaitan dengan ais", characters: [{ char: "冰", pinyin: "bīng" }, { char: "冷", pinyin: "lěng" }, { char: "冻", pinyin: "dòng" }] },
+                    { radical: "氵", meaning: "Water (Air)", description: "Selalunya mempunyai kaitan dengan air", characters: [{ char: "江", pinyin: "jiāng" }, { char: "汁", pinyin: "zhī" }, { char: "清", pinyin: "qīng" }, { char: "治", pinyin: "zhì" }] },
+                    { radical: "灬", meaning: "Fire (Api)", description: "Selalunya digunakan menggambarkan kaitan dengan api", characters: [{ char: "煎", pinyin: "jiān" }, { char: "热", pinyin: "rè" }, { char: "煮", pinyin: "zhǔ" }] }
+                ]
+            },
+            {
+                id: 8,
+                title: "Soalan 8: Rearrange and Rewrite Sentences",
+                instruction: "Susun mengikut nombor, kemudian tulis semula dengan susunan yang betul:",
+                type: "unscramble_rewrite",
+                items: [
+                    {
+                        original: "我爸爸的职业是快递员。",
+                        pinyin: "wǒ bà ba de zhí yè shì kuài dì yuán.",
+                        translation: "My father's occupation is a courier.",
+                        chunks: ["我爸爸的", "职业是", "快递员。"]
+                    },
+                    {
+                        original: "做面包需要面粉和鸡蛋。",
+                        pinyin: "zuò miàn bāo xū yào miàn fěn hé jī dàn.",
+                        translation: "Making bread requires flour and eggs.",
+                        chunks: ["做面包", "需要", "面粉和", "鸡蛋。"]
+                    },
+                    {
+                        original: "星期三妹妹和弟弟去学校阅读。",
+                        pinyin: "xīng qī sān mèi mei hé dì di qù xué xiào yuè dú.",
+                        translation: "On Wednesday, younger sister and younger brother go to school to read.",
+                        chunks: ["星期三", "妹妹和弟弟", "去学校", "阅读。"]
+                    }
+                ]
+            }
+        ];
+
+        // State Management
+        let currentMode = 'study'; // 'study' or 'quiz'
+        let currentSectionIdx = 0;
+        let userScores = {}; // Key: sectionIdx, Value: score
+        let isAudioMuted = false;
+        let isBgmPlaying = false;
+        let audioCtx = null;
+        let bgmInterval = null;
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderTabs();
+            renderContent();
+        });
+
+        // ==========================================
+        // TEXT-TO-SPEECH (MANDARIN PRONUNCIATION)
+        // ==========================================
+        function speakChinese(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any active speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.85; // Slightly slower for clear learning
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Speech synthesis is not supported on your browser.");
+            }
+        }
+
+        // ==========================================
+        // AUDIO SYNTHESIZER (BGM & SFX)
+        // ==========================================
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSoundEffect(type) {
+            initAudio();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.3); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.setValueAtTime(180, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            } else if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        }
+
+        function toggleBGM() {
+            initAudio();
+            isBgmPlaying = !isBgmPlaying;
+            const btnText = document.getElementById('bgmText');
+            const bgmIcon = document.getElementById('bgmIcon');
+
+            if (isBgmPlaying) {
+                btnText.textContent = "BGM: ON";
+                bgmIcon.classList.add('text-pink-400', 'animate-pulse');
+                startProceduralBGM();
+            } else {
+                btnText.textContent = "BGM: OFF";
+                bgmIcon.classList.remove('text-pink-400', 'animate-pulse');
+                stopProceduralBGM();
+            }
+        }
+
+        function startProceduralBGM() {
+            if (bgmInterval) clearInterval(bgmInterval);
+            const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88]; // C Major scale
+            let step = 0;
+
+            bgmInterval = setInterval(() => {
+                if (!isBgmPlaying || !audioCtx) return;
+                const note = notes[step % notes.length];
+                step = (step + Math.floor(Math.random() * 3) + 1) % notes.length;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(note, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.2);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.2);
+            }, 600);
+        }
+
+        function stopProceduralBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        // ==========================================
+        // MODE SWITCHING & NAVIGATION
+        // ==========================================
+        function switchMode(mode) {
+            playSoundEffect('click');
+            currentMode = mode;
+            const btnStudy = document.getElementById('btnStudyMode');
+            const btnQuiz = document.getElementById('btnQuizMode');
+            const quizHeader = document.getElementById('quizHeader');
+
+            if (mode === 'study') {
+                btnStudy.className = "px-3 py-1 rounded-lg bg-white text-blue-700 shadow-sm transition font-bold";
+                btnQuiz.className = "px-3 py-1 rounded-lg text-white hover:text-yellow-200 transition flex items-center gap-1 font-normal";
+                quizHeader.classList.add('hidden');
+            } else {
+                btnQuiz.className = "px-3 py-1 rounded-lg bg-yellow-400 text-blue-900 font-bold shadow-sm transition flex items-center gap-1";
+                btnStudy.className = "px-3 py-1 rounded-lg text-white hover:text-yellow-200 transition font-normal";
+                quizHeader.classList.remove('hidden');
+            }
+
+            renderTabs();
+            renderContent();
+        }
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('sectionTabs');
+            tabsContainer.innerHTML = examData.map((sec, idx) => {
+                const isActive = idx === currentSectionIdx;
+                const score = userScores[idx] !== undefined ? `(${userScores[idx]} pts)` : '';
+                
+                let activeStyle = isActive 
+                    ? "bg-blue-600 text-white shadow-md border-blue-600 font-bold" 
+                    : "bg-white text-slate-600 hover:bg-slate-100 border-slate-200";
+
+                return `
+                    <button onclick="selectSection(${idx})" 
+                        class="px-4 py-2 rounded-xl text-sm whitespace-nowrap transition-all border ${activeStyle} flex items-center gap-2">
+                        <span>Q${sec.id}</span>
+                        ${currentMode === 'quiz' && userScores[idx] !== undefined ? `<span class="bg-emerald-500 text-white text-xs px-1.5 py-0.5 rounded-full">✓</span>` : ''}
+                    </button>
+                `;
+            }).join('');
+
+            // Render score pills if in quiz mode
+            if (currentMode === 'quiz') {
+                const pillsContainer = document.getElementById('questionPills');
+                pillsContainer.innerHTML = examData.map((sec, idx) => {
+                    const isDone = userScores[idx] !== undefined;
+                    return `
+                        <button onclick="selectSection(${idx})" class="w-8 h-8 rounded-lg text-xs font-bold transition flex items-center justify-center ${idx === currentSectionIdx ? 'ring-2 ring-blue-500 ring-offset-2' : ''} ${isDone ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}">
+                            ${sec.id}
+                        </button>
+                    `;
+                }).join('');
+            }
+        }
+
+        function selectSection(idx) {
+            playSoundEffect('click');
+            currentSectionIdx = idx;
+            renderTabs();
+            renderContent();
+        }
+
+        // ==========================================
+        // MAIN CONTENT RENDERER
+        // ==========================================
+        function renderContent() {
+            const content = document.getElementById('appContent');
+            const data = examData[currentSectionIdx];
+
+            let html = `
+                <div class="glass-card rounded-3xl p-5 md:p-8 shadow-xl mb-6">
+                    <!-- Title Header -->
+                    <div class="border-b border-slate-200/80 pb-4 mb-6 flex flex-wrap justify-between items-center gap-2">
+                        <div>
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                                ${currentMode === 'study' ? '📖 Study & Revision' : '⚡ Interactive Practice Quiz'}
+                            </span>
+                            <h2 class="text-xl md:text-2xl font-bold text-slate-800 mt-2">${data.title}</h2>
+                            <p class="text-sm text-slate-500 mt-1">${data.instruction}</p>
+                        </div>
+                        <button onclick="speakChinese('${data.title.split(':')[1] || ''}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 p-2.5 rounded-xl flex items-center gap-2 text-xs font-semibold transition">
+                            <i data-lucide="volume-2" class="w-4 h-4"></i> Listen Section Title
+                        </button>
+                    </div>
+            `;
+
+            if (currentMode === 'study') {
+                html += renderStudyView(data);
+            } else {
+                html += renderQuizView(data);
+            }
+
+            html += `</div>`;
+            content.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // STUDY MODE VIEWS
+        // ==========================================
+        function renderStudyView(data) {
+            let html = ``;
+
+            if (data.id === 1) {
+                html += `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${data.items.map(item => `
+                            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition text-center bounce-hover">
+                                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                    <i data-lucide="${item.icon}" class="w-8 h-8"></i>
+                                </div>
+                                <div class="text-xs font-semibold text-blue-500 tracking-wide">${item.pinyin}</div>
+                                <div class="text-2xl font-bold text-slate-800 my-1 zh-char">${item.char}</div>
+                                <div class="text-xs text-slate-500 mb-3">${item.translation}</div>
+                                <button onclick="speakChinese('${item.char}')" class="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-600 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                                    <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Pronounce
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 2) {
+                html += `
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                        ${data.items.map(item => `
+                            <div class="bg-amber-50/50 rounded-2xl p-4 border border-amber-100 text-center hover:bg-amber-50 transition bounce-hover">
+                                <div class="text-4xl mb-2">${item.emoji}</div>
+                                <div class="text-xs font-semibold text-amber-600">${item.pinyin}</div>
+                                <div class="text-xl font-bold text-slate-800 zh-char my-1">${item.char}</div>
+                                <div class="text-xs text-slate-500 mb-2">${item.translation}</div>
+                                <button onclick="speakChinese('${item.char}')" class="w-full bg-white text-amber-700 hover:bg-amber-500 hover:text-white border border-amber-200 py-1.5 rounded-lg text-xs font-medium transition">
+                                    🔊 Listen
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 3) {
+                html += `
+                    <div class="space-y-3">
+                        ${data.items.map(item => `
+                            <div class="bg-white rounded-xl p-4 border border-slate-100 flex items-center justify-between shadow-sm">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-3xl">${item.emoji}</span>
+                                    <div>
+                                        <div class="text-xl font-bold text-slate-800 zh-char">${item.char}</div>
+                                        <div class="text-xs text-slate-500">${item.translation}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-sm font-semibold tracking-wide">${item.pinyin}</span>
+                                    <button onclick="speakChinese('${item.char}')" class="p-2 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded-lg transition text-slate-600">
+                                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 4) {
+                html += `
+                    <div class="space-y-4">
+                        ${data.items.map(item => `
+                            <div class="p-4 rounded-2xl border ${item.isCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/60 border-rose-200'} flex flex-wrap items-center justify-between gap-3">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xl font-bold ${item.isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${item.isCorrect ? '✅ BETUL' : '❌ SALAH'}</span>
+                                        <span class="text-lg font-bold text-slate-800 zh-char">${item.sentence}</span>
+                                    </div>
+                                    <div class="text-xs text-slate-500 tracking-wide">${item.pinyin}</div>
+                                    ${item.correctForm ? `<div class="text-xs font-semibold text-emerald-700 mt-1">Correct Structure: ${item.correctForm}</div>` : ''}
+                                    <p class="text-xs text-slate-600 italic">${item.note}</p>
+                                </div>
+                                <button onclick="speakChinese('${item.sentence}')" class="px-3 py-1.5 bg-white shadow-sm border rounded-xl text-xs font-semibold hover:bg-slate-50 flex items-center gap-1.5">
+                                    🔊 Listen
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 5) {
+                html += `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        ${data.items.map(item => `
+                            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm text-center">
+                                <div class="text-5xl font-bold text-blue-600 zh-char mb-2">${item.char}</div>
+                                <div class="text-sm font-semibold text-indigo-600">${item.pinyin}</div>
+                                <div class="text-xs text-slate-500 mb-3">${item.translation}</div>
+                                <div class="bg-slate-50 p-3 rounded-xl text-xs text-left space-y-1">
+                                    <div><strong>Components:</strong> ${item.components.join(' + ')}</div>
+                                    <div><strong>Strokes:</strong> ${item.strokeCount} strokes</div>
+                                </div>
+                                <button onclick="speakChinese('${item.char}')" class="mt-3 w-full bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-600 py-1.5 rounded-lg text-xs font-medium transition">
+                                    🔊 Listen Sound
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 6) {
+                html += `
+                    <div class="space-y-3">
+                        ${data.items.map(item => `
+                            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-wrap justify-between items-center gap-3">
+                                <div class="space-y-1">
+                                    <span class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">Ayat ${item.id}</span>
+                                    <div class="text-lg font-bold text-slate-800 zh-char">${item.text}</div>
+                                    <div class="text-xs text-blue-600 font-medium">${item.pinyin}</div>
+                                    <div class="text-xs text-slate-500">${item.translation}</div>
+                                </div>
+                                <button onclick="speakChinese('${item.text}')" class="px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                                    <i data-lucide="volume-2" class="w-4 h-4"></i> Play Audio
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 7) {
+                html += `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${data.radicals.map(rad => `
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                                <div class="text-center pb-3 border-b border-slate-100 mb-3">
+                                    <span class="text-4xl font-bold text-indigo-600 zh-char">${rad.radical}</span>
+                                    <div class="text-xs font-bold text-slate-700 mt-1">${rad.meaning}</div>
+                                    <p class="text-xs text-slate-400 italic mt-0.5">${rad.description}</p>
+                                </div>
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    ${rad.characters.map(c => `
+                                        <div onclick="speakChinese('${c.char}')" class="bg-indigo-50 hover:bg-indigo-100 cursor-pointer p-2 rounded-xl text-center min-w-[60px] transition">
+                                            <div class="text-xl font-bold text-indigo-900 zh-char">${c.char}</div>
+                                            <div class="text-[10px] text-indigo-600">${c.pinyin}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (data.id === 8) {
+                html += `
+                    <div class="space-y-4">
+                        ${data.items.map((item, i) => `
+                            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-2">
+                                <div class="text-xs font-bold text-blue-600">Sentence ${i + 1}</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${item.chunks.map(chunk => `
+                                        <span class="bg-slate-100 border border-slate-200 px-3 py-1 rounded-xl text-sm font-semibold text-slate-700 zh-char">${chunk}</span>
+                                    `).join('')}
+                                </div>
+                                <div class="text-sm font-bold text-emerald-700 mt-2">Correct Order: <span class="zh-char">${item.original}</span></div>
+                                <div class="text-xs text-slate-500">${item.pinyin} — <em>"${item.translation}"</em></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            return html;
+        }
+
+        // ==========================================
+        // QUIZ MODE GENERATORS & EVALUATOR
+        // ==========================================
+        function renderQuizView(data) {
+            let html = `<form id="quizForm" onsubmit="submitQuiz(event, ${data.id})">`;
+
+            if (data.id === 1) {
+                html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+                data.items.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                                    <i data-lucide="${item.icon}" class="w-6 h-6"></i>
+                                </div>
+                                <div class="text-xs text-slate-500">Target Action (${item.translation})</div>
+                            </div>
+                            <select name="q1_${idx}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="">-- Choose correct word --</option>
+                                ${shuffleArray([...data.items]).map(opt => `
+                                    <option value="${opt.char}">${opt.char} (${opt.pinyin})</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 2) {
+                html += `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                data.items.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
+                            <div class="text-4xl mb-2">${item.emoji}</div>
+                            <div class="text-xs font-semibold text-slate-500 mb-2">${item.translation}</div>
+                            <div class="grid grid-cols-1 gap-1.5 text-left">
+                                ${shuffleArray([...data.items]).map(opt => `
+                                    <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 hover:bg-slate-100 cursor-pointer border border-slate-200 text-xs">
+                                        <input type="radio" name="q2_${idx}" value="${opt.char}" required class="text-blue-600 focus:ring-blue-500">
+                                        <span class="font-bold zh-char">${opt.char}</span>
+                                        <span class="text-slate-400">(${opt.pinyin})</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 3) {
+                html += `<div class="space-y-3">`;
+                data.items.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">${item.emoji}</span>
+                                <span class="text-xl font-bold text-slate-800 zh-char">${item.char}</span>
+                            </div>
+                            <select name="q3_${idx}" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-indigo-700 outline-none">
+                                <option value="">-- Match Pinyin --</option>
+                                ${shuffleArray([...data.items]).map(opt => `
+                                    <option value="${opt.pinyin}">${opt.pinyin}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 4) {
+                html += `<div class="space-y-4">`;
+                data.items.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <div class="text-lg font-bold text-slate-800 zh-char">${item.sentence}</div>
+                                <div class="text-xs text-slate-500">${item.pinyin}</div>
+                            </div>
+                            <div class="flex gap-2">
+                                <label class="px-4 py-2 rounded-xl border border-slate-200 bg-emerald-50 hover:bg-emerald-100 cursor-pointer text-xs font-bold text-emerald-700 flex items-center gap-1">
+                                    <input type="radio" name="q4_${idx}" value="true" required> Betul ✅
+                                </label>
+                                <label class="px-4 py-2 rounded-xl border border-slate-200 bg-rose-50 hover:bg-rose-100 cursor-pointer text-xs font-bold text-rose-700 flex items-center gap-1">
+                                    <input type="radio" name="q4_${idx}" value="false" required> Salah ❌
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 5) {
+                html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+                data.items.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-indigo-600">${item.pinyin} (${item.translation})</span>
+                                <span class="text-xs text-slate-400">${item.strokeCount} strokes</span>
+                            </div>
+                            <div class="text-xs text-slate-600">Select components that form this character:</div>
+                            <div class="flex flex-wrap gap-2">
+                                ${shuffleArray([...data.items.flatMap(i => i.components)]).slice(0, 6).concat(item.components).filter((v, i, a) => a.indexOf(v) === i).map(comp => `
+                                    <label class="px-3 py-1.5 bg-slate-100 border rounded-xl text-sm font-bold cursor-pointer hover:bg-indigo-50">
+                                        <input type="checkbox" name="q5_${idx}" value="${comp}"> ${comp}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 6) {
+                html += `<div class="space-y-4">`;
+                data.items.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                            <div class="text-xs font-bold text-blue-600">Ayat ${item.id}: ${item.pinyin}</div>
+                            <div class="text-sm text-slate-500 italic">Target: "${item.text}"</div>
+                            <input type="text" name="q6_${idx}" placeholder="Type sentence here: ${item.text}" required
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-base font-bold text-slate-800 zh-char focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 7) {
+                const allRadicalChars = data.radicals.flatMap(r => r.characters.map(c => ({ ...c, radical: r.radical })));
+                html += `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`;
+                allRadicalChars.forEach((item, idx) => {
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <span class="text-2xl font-bold text-slate-800 zh-char">${item.char}</span>
+                                <span class="text-xs text-slate-500 ml-2">(${item.pinyin})</span>
+                            </div>
+                            <select name="q7_${idx}" required class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-indigo-700 outline-none">
+                                <option value="">-- Choose Radical --</option>
+                                ${data.radicals.map(r => `
+                                    <option value="${r.radical}">${r.radical} (${r.meaning})</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            } else if (data.id === 8) {
+                html += `<div class="space-y-4">`;
+                data.items.forEach((item, idx) => {
+                    const shuffled = shuffleArray([...item.chunks]);
+                    html += `
+                        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                            <div class="text-xs font-bold text-slate-500">Sentence ${idx + 1} (${item.translation})</div>
+                            <div class="flex flex-wrap gap-2">
+                                ${shuffled.map((chunk, cIdx) => `
+                                    <span class="bg-blue-50 text-blue-800 px-3 py-1 rounded-xl text-sm font-bold border border-blue-200 zh-char">${chunk}</span>
+                                `).join('')}
+                            </div>
+                            <input type="text" name="q8_${idx}" placeholder="Type assembled sentence here..." required
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-base font-bold text-slate-800 zh-char focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            html += `
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold px-6 py-3 rounded-2xl shadow-lg transition flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> Submit & Check Answers
+                    </button>
+                </div>
+            </form>`;
+
+            return html;
+        }
+
+        // ==========================================
+        // QUIZ EVALUATION LOGIC
+        // ==========================================
+        function submitQuiz(event, qId) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = examData[currentSectionIdx];
+            let score = 0;
+            let maxScore = 0;
+
+            if (qId === 1) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const val = formData.get(`q1_${idx}`);
+                    if (val === item.char) score++;
+                });
+            } else if (qId === 2) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const val = formData.get(`q2_${idx}`);
+                    if (val === item.char) score++;
+                });
+            } else if (qId === 3) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const val = formData.get(`q3_${idx}`);
+                    if (val === item.pinyin) score++;
+                });
+            } else if (qId === 4) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const val = formData.get(`q4_${idx}`);
+                    const boolVal = val === 'true';
+                    if (boolVal === item.isCorrect) score++;
+                });
+            } else if (qId === 5) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const selected = formData.getAll(`q5_${idx}`);
+                    const isAllMatch = item.components.every(c => selected.includes(c)) && selected.length === item.components.length;
+                    if (isAllMatch) score++;
+                });
+            } else if (qId === 6) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const val = (formData.get(`q6_${idx}`) || "").trim();
+                    if (val === item.text) score++;
+                });
+            } else if (qId === 7) {
+                const allRadicalChars = data.radicals.flatMap(r => r.characters.map(c => ({ ...c, radical: r.radical })));
+                maxScore = allRadicalChars.length;
+                allRadicalChars.forEach((item, idx) => {
+                    const val = formData.get(`q7_${idx}`);
+                    if (val === item.radical) score++;
+                });
+            } else if (qId === 8) {
+                maxScore = data.items.length;
+                data.items.forEach((item, idx) => {
+                    const val = (formData.get(`q8_${idx}`) || "").trim();
+                    if (val === item.original) score++;
+                });
+            }
+
+            // Save user score
+            userScores[currentSectionIdx] = score;
+
+            // Recalculate Total Score
+            const total = Object.values(userScores).reduce((a, b) => a + b, 0);
+            document.getElementById('totalScore').textContent = total;
+
+            // Feedback Audio & Animation
+            if (score === maxScore) {
+                playSoundEffect('correct');
+                confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
+                alert(`🎉 Perfect Score! You got ${score} / ${maxScore} points!`);
+            } else {
+                playSoundEffect('wrong');
+                alert(`👍 Good effort! You got ${score} / ${maxScore} points. Review the study section to improve!`);
+            }
+
+            renderTabs();
+        }
+
+        // Utility: Array Shuffler
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+    </script>
+</body>
+</html>
